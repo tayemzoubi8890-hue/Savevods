@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SaveVods | تحميل الفيديو</title>
+    <style>
+        :root { --main: #a855f7; --green: #22c55e; }
+        body { background: #000; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; align-items: center; padding: 40px 20px; }
+        .card { background: #0a0a0a; width: 100%; max-width: 500px; padding: 30px; border-radius: 20px; border: 1px solid #222; text-align: center; }
+        input { width: 100%; padding: 15px; border-radius: 12px; border: 1px solid #333; background: #000; color: #fff; margin-bottom: 15px; text-align: center; font-size: 16px; }
+        .btn { width: 100%; padding: 15px; border-radius: 12px; border: none; background: var(--main); color: #fff; font-weight: bold; cursor: pointer; font-size: 18px; }
+        
+        /* صندوق النتيجة - مثل SaveFrom */
+        #result { display: none; margin-top: 25px; padding: 15px; border: 1px solid #333; border-radius: 15px; background: #111; animation: fadeIn 0.5s; }
+        #result img { width: 100%; border-radius: 10px; }
+        .dl-link { display: block; margin-top: 15px; padding: 15px; background: var(--green); color: #fff; text-decoration: none; border-radius: 10px; font-weight: bold; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+    <h1 style="font-size: 40px; margin-bottom: 20px;">SAVE<span style="color:var(--main)">VODS</span></h1>
+    <div class="card">
+        <input type="text" id="vUrl" placeholder="الصق رابط الفيديو هنا...">
+        <button class="btn" onclick="getVid()">تحميل الآن ⚡</button>
+        <div id="loader" style="display:none; margin-top:15px; color:var(--main)">جاري المعالجة...</div>
+        
+        <div id="result">
+            <img id="thumb" src="">
+            <p id="title" style="margin: 10px 0; font-size: 14px; color: #aaa;"></p>
+            <a id="dlBtn" class="dl-link" href="" target="_blank">📥 تحميل الفيديو (MP4)</a>
+        </div>
+    </div>
+    <script>
+        async function getVid() {
+            const url = document.getElementById('vUrl').value;
+            if(!url) return alert("ضع الرابط!");
+            document.getElementById('loader').style.display = "block";
+            document.getElementById('result').style.display = "none";
+            
+            try {
+                // الاتصال بـ API الخاص بك في Vercel
+                const res = await fetch('/api/download', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url})
+                });
+                const data = await res.json();
+                document.getElementById('loader').style.display = "none";
+                if(data.url) {
+                    document.getElementById('thumb').src = data.thumbnail;
+                    document.getElementById('title').innerText = data.title;
+                    document.getElementById('dlBtn').href = data.url;
+                    document.getElementById('result').style.display = "block";
+                }
+            } catch (e) { alert("حدث خطأ في السيرفر"); }
+        }
+    </script>
+</body>
+</html>
